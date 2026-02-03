@@ -13,7 +13,7 @@ class Database:
         return self.cursor
     
     def buscar_tudo(self, query: str, params: tuple = ()) -> list[Any]:
-        self.crusor.execute(query, params)
+        self.cursor.execute(query, params)
         return self.cursor.fetchall()
     
     def close(self) -> None:
