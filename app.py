@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from models.tarefa import Tarefa
 
 app = Flask(__name__)
@@ -8,7 +8,7 @@ def home():
    return render_template("home.html", titulo= 'Home')
 
 @app.route('/agenda', methods=['GET', 'POST'])
-def agenda ():
+def agenda():
     tarefas = None
 
     if request.method == 'POST':
@@ -21,12 +21,13 @@ def agenda ():
     tarefas = Tarefa.obter_tarefas()
     return render_template('agenda.html',titulo='Agenda',tarefas=tarefas)
 
-@app.route('/delete/<int:idTarefa> ')
+@app.route('/delete/<int:idTarefa>')
 def delete(idTarefa):
     tarefa = Tarefa.id(idTarefa)
     tarefa.excluir_tarefa()
-    return
+    #return render_template('agenda.html', titulo="agenda", tarefas=tarefas)
+    return redirect(url_for('agenda'))
 
 @app.route('/(Olá')
 def ola_mundo():
-    return render_template('ola.html', titulo='Olá!', nome='Flaks')
+    return "Olá, mundo!"

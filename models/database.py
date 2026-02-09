@@ -1,5 +1,8 @@
 from sqlite3 import Connection, connect, Cursor
-from typing import Any
+import traceback
+from types import TracebackType
+from typing import Any, Optional, Self
+
 
 class Database: 
     
@@ -23,11 +26,21 @@ class Database:
 
 
     # Método de entrada de contexto
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
     
     # Método de saída do contexto
-    def __exit__(self, exc_type, exc_balue, traceback):
+    def __exit__(
+            self,
+              exc_type: Optional[type[BaseException]], exc_value: Optional[BaseException], tb: Optional[TracebackType]) -> None:
+
+        if exc_type is not None:
+            print('Exceção capturada no contexto')
+            print(f'type: {exc_type.__name__}')
+            print(f'Mensagem: {exc_value}')
+            print('Traceback completo:')
+            traceback.print_tb
+
         self.close()
 
 # Áreas de teste
