@@ -15,11 +15,11 @@
             value="{{ tarefa_selecionada.data_conclusao if tarefa_selecionada else ''}}">
         </div>
        
-        <button type="submit" class="btn btn-primary">Adicionar</button>
+        <button type="submit" class="btn btn-primary">➕Adicionar</button>
 
 
         {% if tarefa_selecionada%}
-        <a href="{{url_for('agenda')}}" class="btn-secundary" > Cancelar</a>
+        <a href="{{url_for('agenda')}}" class="btn-secundary" >❌Cancelar</a>
 
         {% endif%}
 
@@ -32,8 +32,8 @@
             <ul>
                 {% for tarefa in tarefas %}
                     <li>{{ tarefa.titulo_tarefa }} - {{ tarefa.data_conclusao }}
-                         <a href="{{ url_for('delete', idTarefa=tarefa.id_tarefa)}}">Apagar</a>
-                        <a href="{{url_for('update', idTarefa=tarefa.id_tarefa)}}">Editar</a>
+                         <a href="{{ url_for('delete', idTarefa=tarefa.id_tarefa)}}">🗑️Apagar</a>
+                        <a href="{{url_for('update', idTarefa=tarefa.id_tarefa)}}">📝Editar</a>
                     </li>
                     <!-- Controle para editar  -->
                 {% endfor %}
