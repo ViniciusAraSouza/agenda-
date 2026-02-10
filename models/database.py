@@ -1,12 +1,28 @@
 from sqlite3 import Connection, connect, Cursor
-import traceback
 from types import TracebackType
-from typing import Any, Optional, Self
+from typing import Any, Optional, Self, Type
+from dotenv import load_dotenv
+import traceback
+import os
 
+load_dotenv() #Produra um arquivo .env com variáveis
+DB_PATH = os.getenv('DATABASE','./data/tarefas.sqlite3')
+
+def init_db(db_name: str = DB_PATH):
+    with connect(db_name) as conn:
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS tarefas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo_tarefa TEXT NOT NULL,
+            data_conclusao TEXT);
+""")
+        
+        class Database:
+            """ Classe que gerencia conexõs e operações com um banco de dados SQLite.Utiliza o protocolo de gerenciamento de contexto para garantir que a conexão seja encerrada corretamete.
+            """
 
 class Database: 
-    
-    def __init__(self, db_name: str) -> None:
+    def __init__(self, db_name: str = DB_PATH) -> None:
         self.connection: Connection = connect(db_name)
         self.cursor: Cursor = self.connection.cursor()
 
@@ -32,7 +48,7 @@ class Database:
     # Método de saída do contexto
     def __exit__(
             self,
-              exc_type: Optional[type[BaseException]], exc_value: Optional[BaseException], tb: Optional[TracebackType]) -> None:
+              exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], tb: Optional[TracebackType]) -> None:
 
         if exc_type is not None:
             print('Exceção capturada no contexto')
