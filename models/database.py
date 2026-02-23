@@ -15,16 +15,20 @@ def init_db(db_name: str = DB_PATH):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             titulo_tarefa TEXT NOT NULL,
             data_conclusao TEXT);
-""")
+        """)
         
         class Database:
             """ Classe que gerencia conexõs e operações com um banco de dados SQLite.Utiliza o protocolo de gerenciamento de contexto para garantir que a conexão seja encerrada corretamete.
             """
 
 class Database: 
+    
     def __init__(self, db_name: str = DB_PATH) -> None:
         self.connection: Connection = connect(db_name)
         self.cursor: Cursor = self.connection.cursor()
+        self.executar('''
+            CREATE TABLE IF NOT EXISTS tarefas(id INTEGER PRIMARY KEY AUTOINCREMENT, titulo_tarefa TEXT NOT NULL, data_conclusao TEXT);
+            ''')
 
     def executar(self, query: str, params: tuple = ()) -> Cursor:
         self.cursor.execute(query,params)
