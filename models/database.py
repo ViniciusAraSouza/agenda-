@@ -1,78 +1,42 @@
-from sqlite3 import Connection, connect, Cursor
-from types import TracebackType
-from typing import Any, Optional, Self, Type
-from dotenv import load_dotenv
-import traceback
-import os
+import sqlite3
+from contextlib import contextmanager
 
-load_dotenv() #Produra um arquivo .env com variáveis
-DB_PATH = os.getenv('DATABASE','./data/tarefas.sqlite3')
+DB_FILE = 'agenda.db'  # Nome do arquivo do banco SQLite
 
-def init_db(db_name: str = DB_PATH):
-    with connect(db_name) as conn:
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS tarefas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo_tarefa TEXT NOT NULL,
-            data_conclusao TEXT);
+# -------------------------
+# Inicializa banco de dados
+# -------------------------
+def init_db():
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS tarefas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titulo TEXT NOT NULL,
+                tipo TEXT,
+                data_conclusao TEXT,
+                status TEXT DEFAULT 'Pendente',
+                indicado_por TEXT
+            );
         """)
-        
-        class Database:
-            """ Classe que gerencia conexõs e operações com um banco de dados SQLite.Utiliza o protocolo de gerenciamento de contexto para garantir que a conexão seja encerrada corretamete.
-            """
+        conn.commit()
 
-class Database: 
-    
-    def __init__(self, db_name: str = DB_PATH) -> None:
-        self.connection: Connection = connect(db_name)
-        self.cursor: Cursor = self.connection.cursor()
-        self.executar('''
-            CREATE TABLE IF NOT EXISTS tarefas(id INTEGER PRIMARY KEY AUTOINCREMENT, titulo_tarefa TEXT NOT NULL, data_conclusao TEXT);
-            ''')
+# -------------------------
+# Classe de contexto para banco
+# -------------------------
+class Database:
+    def __enter__(self):
+        self.conn = sqlite3.connect(DB_FILE)
+        self.cursor = self.conn.cursor()
+        return self
 
-    def executar(self, query: str, params: tuple = ()) -> Cursor:
-        self.cursor.execute(query,params)
-        self.connection.commit()
-        return self.cursor
-    
-    def buscar_tudo(self, query: str, params: tuple = ()) -> list[Any]:
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.conn.commit()
+        self.conn.close()
+
+    def executar(self, query, params=()):
+        self.cursor.execute(query, params)
+
+    def buscar_tudo(self, query, params=()):
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
-    
-    def close(self) -> None:
-        self.connection.close()
-
-    # Métodos para o gerenciamento de contexto
-
-
-    # Método de entrada de contexto
-    def __enter__(self) -> Self:
-        return self
-    
-    # Método de saída do contexto
-    def __exit__(
-            self,
-              exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], tb: Optional[TracebackType]) -> None:
-
-        if exc_type is not None:
-            print('Exceção capturada no contexto')
-            print(f'type: {exc_type.__name__}')
-            print(f'Mensagem: {exc_value}')
-            print('Traceback completo:')
-            traceback.print_tb
-
-        self.close()
-
-# Áreas de teste
-
-# try:
-#     db = Database('./data/tarefas.sqlite3')
-#     db.executar('''
-#     CREATE TABLE IF NOT EXISTS tarefas (
-#         id INTEGER PRIMARY KEY AUTOINCREMENT, titulo_tarefa TEXT NOT NULL, data_conclusao TEXT)
-#     ''')
-#     db.executar('INSERT INTO tarefas (titulo_tarefa, data_conclusao) VALUES (?,?);', ('Estudar Python', '2026-02-02'))
-# except Exception as e:
-#     print(f"Erro ao criar tabela: {e}")
-# finally: 
-#     db.close()

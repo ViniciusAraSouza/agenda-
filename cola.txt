@@ -1,0 +1,2 @@
+O que é contextmanager?
+contextmanager é um decorador do módulo contextlib que serve para criar um gerenciador de contexto usando uma função com yield, em vez de criar uma classe com __enter__ e __exit__
