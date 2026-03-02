@@ -1,11 +1,16 @@
+import os
 import sqlite3
-from contextlib import contextmanager
+from flask.cli import load_dotenv
 
-DB_FILE = 'agenda.db'  # Nome do arquivo do banco SQLite
+load_dotenv()
 
-# -------------------------
-# Inicializa banco de dados
-# -------------------------
+DB_FILE = os.getenv("DATABASE", "./data/tarefas.sqlite3")
+
+data_dir = os.path.dirname(DB_FILE)
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir, exist_ok=True)
+
+
 def init_db():
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
@@ -21,9 +26,7 @@ def init_db():
         """)
         conn.commit()
 
-# -------------------------
-# Classe de contexto para banco
-# -------------------------
+
 class Database:
     def __enter__(self):
         self.conn = sqlite3.connect(DB_FILE)

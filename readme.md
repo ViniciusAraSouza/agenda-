@@ -25,7 +25,7 @@ python -m venv .venv
     No bash:
 
     ~~~bash
-    source .venv/Scripits/activate
+    source .venv/Scripts/activate
     ~~~
 
     No PowerShell:
@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 7. Copie o arquivo `.env.example` cole na raiz do projetoe renomeie a cópia para `.env`.
 
-8. Edite o arquivo .venv para definir o caminho de seu banco de dadosna constante `DATABASE`. Exemplo:
+8. Edite o arquivo .env para definir o caminho de seu banco de dados na constante `DATABASE`. Exemplo:
 
 ~~~env
 DATABASE='./data/meubanco.db'
