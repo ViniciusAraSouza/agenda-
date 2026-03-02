@@ -2,66 +2,88 @@
 
 {% block content %}
 
-<!-- Formulário para adicionar ou editar tarefa -->
-<form class="mt-3" method="POST">
-    <div class="mb-3">
-        <label class="form-label">Título:</label>
-        <input type="text" class="form-control" name="titulo-tarefa"
-               value="{{ tarefa_selecionada.titulo if tarefa_selecionada else ''}}" required>
+<form method="POST" action="{{ url_for('agenda') }}" class="row g-2 mb-4">
+
+    <div class="col-md-4">
+        <input type="text"
+               name="titulo-tarefa"
+               class="form-control"
+               placeholder="Digite a tarefa"
+               required>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Tipo:</label>
-        <select class="form-select" name="tipo-tarefa" required>
-            <option value="">Selecione</option>
-            <option value="Filme" {% if tarefa_selecionada and tarefa_selecionada.tipo=='Filme' %}selected{% endif %}>Filme</option>
-            <option value="Serie" {% if tarefa_selecionada and tarefa_selecionada.tipo=='Serie' %}selected{% endif %}>Série</option>
-            <option value="Jogo" {% if tarefa_selecionada and tarefa_selecionada.tipo=='Jogo' %}selected{% endif %}>Jogo</option>
-            <option value="Livro" {% if tarefa_selecionada and tarefa_selecionada.tipo=='Livro' %}selected{% endif %}>Livro</option>
-        </select>
+    <div class="col-md-3">
+        <input type="date"
+               name="data-conclusao"
+               class="form-control">
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Data de conclusão:</label>
-        <input type="date" class="form-control" name="data-conclusao"
-               value="{{ tarefa_selecionada.data_conclusao if tarefa_selecionada else ''}}">
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">
+            Adicionar
+        </button>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Indicado por:</label>
-        <input type="text" class="form-control" name="indicado-por"
-               value="{{ tarefa_selecionada.indicado_por if tarefa_selecionada else ''}}">
-    </div>
-
-    {% if tarefa_selecionada %}
-    <div class="mb-3">
-        <label class="form-label">Status:</label>
-        <select class="form-select" name="status">
-            <option value="Pendente" {% if tarefa_selecionada.status=='Pendente' %}selected{% endif %}>Pendente</option>
-            <option value="Concluída" {% if tarefa_selecionada.status=='Concluída' %}selected{% endif %}>Concluída</option>
-        </select>
-    </div>
-    {% endif %}
-
-    <button type="submit" class="btn btn-primary">Salvar</button>
 </form>
 
-<hr>
+{% if tarefas %}
 
-<!-- Lista de tarefas agrupadas por tipo -->
+<ul class="list-group">
 
-{% for tipo in ["Filme", "Serie", "Jogo", "Livro"] %}
-    <h2>{{ tipo }}s</h2>
-    <ul>
-    {% for tarefa in tarefas if tarefa.tipo==tipo %}
-        <li>
-            {{ tarefa.titulo }} - {{ tarefa.status }} {% if tarefa.indicado_por %}- {{ tarefa.indicado_por }}{% endif %}
-            <a href="{{ url_for('concluir', idTarefa=tarefa.id_tarefa) }}" class="ms-2">✔</a>
-            <a href="{{ url_for('update', idTarefa=tarefa.id_tarefa) }}" class="ms-2">📝</a>
-            <a href="{{ url_for('delete', idTarefa=tarefa.id_tarefa) }}" class="ms-2">🗑</a>
-        </li>
+    {% for tarefa in tarefas %}
+
+    <li class="list-group-item d-flex justify-content-between 
+               align-items-center">
+
+        <div>
+            <span class="{% if tarefa.data_conclusao %}text-decoration
+                        -line-through text-muted{% endif %}">
+                {{ tarefa.titulo_tarefa }}
+            </span>
+
+            {% if tarefa.data_prevista %}
+                <small class="ms-2 text-info">
+                    (Prazo: {{ tarefa.data_prevista }})
+                </small>
+            {% endif %}
+
+            {% if tarefa.data_conclusao %}
+                <small class="ms-2 text-success">
+                    (Concluída em {{ tarefa.data_conclusao }})
+                </small>
+            {% endif %}
+        </div>
+
+        <div>
+            <a href="{{ url_for('delete', idTarefa=tarefa.id_tarefa) }}"
+               class="btn btn-outline-danger btn-sm">
+               Apagar
+            </a>
+
+            {% if not tarefa.data_conclusao %}
+                <a href="{{ url_for('concluir', idTarefa=tarefa.id_tarefa) }}"
+                   class="btn btn-outline-success btn-sm">
+                   Concluir
+                </a>
+            {% else %}
+                <span class="badge bg-success">
+                    Concluída
+                </span>
+            {% endif %}
+        </div>
+
+    </li>
+
     {% endfor %}
-    </ul>
-{% endfor %}
+
+</ul>
+
+{% else %}
+
+<div class="alert alert-secondary">
+    Nenhuma tarefa cadastrada
+</div>
+
+{% endif %}
 
 {% endblock %}

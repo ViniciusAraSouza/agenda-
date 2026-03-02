@@ -1,45 +1,41 @@
-import os
 import sqlite3
-from flask.cli import load_dotenv
+import os
 
-load_dotenv()
-
-DB_FILE = os.getenv("DATABASE", "./data/tarefas.sqlite3")
-
-data_dir = os.path.dirname(DB_FILE)
-if not os.path.exists(data_dir):
-    os.makedirs(data_dir, exist_ok=True)
-
+# Caminho absoluto da pasta do projeto
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "tarefas.sqlite3")
 
 def init_db():
-    with sqlite3.connect(DB_FILE) as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS tarefas (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                titulo TEXT NOT NULL,
-                tipo TEXT,
-                data_conclusao TEXT,
-                status TEXT DEFAULT 'Pendente',
-                indicado_por TEXT
-            );
-        """)
-        conn.commit()
+    print("Banco sendo criado em:", DB_PATH)
 
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS tarefas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo_tarefa TEXT NOT NULL,
+            data_conclusao TEXT
+        );
+        """)
 
 class Database:
-    def __enter__(self):
-        self.conn = sqlite3.connect(DB_FILE)
-        self.cursor = self.conn.cursor()
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.conn.commit()
-        self.conn.close()
+    def __init__(self):
+        self.connection = sqlite3.connect(DB_PATH)
+        self.cursor = self.connection.cursor()
 
     def executar(self, query, params=()):
         self.cursor.execute(query, params)
+        self.connection.commit()
+        return self.cursor
 
     def buscar_tudo(self, query, params=()):
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
+
+    def close(self):
+        self.connection.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb):
+        self.close()
